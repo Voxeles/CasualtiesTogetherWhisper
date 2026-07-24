@@ -11,7 +11,6 @@ public class IconController : MonoBehaviour
 {
     private static Texture2D _iconTexture;
     private Dictionary<NetBody, GameObject> _playerIcons = [];
-    private Dictionary<NetPlayer, NetBody> _bodies = [];
     private bool _wasTyping = false;
     private float _timer = 0;
     
@@ -29,7 +28,6 @@ public class IconController : MonoBehaviour
         foreach (var icon in _playerIcons.Values)
             Destroy(icon);
         _playerIcons.Clear();
-        _bodies.Clear();
     }
 
     private void OnWorldgenFinish()
@@ -37,47 +35,24 @@ public class IconController : MonoBehaviour
         foreach (var icon in _playerIcons.Values)
             Destroy(icon);
         _playerIcons.Clear();
-        _bodies.Clear();
-        foreach (var player in NetPlayer.ClientIdToPlayerDict.Values)
-        {
-            player.TryGetNetBody(out var netBody);
-            if (netBody == null)
-                continue;
+        foreach (var netBody in NetBody.all_instances)
             _playerIcons.Add(netBody, CreateIconObjectForPlayer(netBody));
-            _bodies.Add(player, netBody);
-        }
     }
 
     private void OnPlayerLeft(NetPlayer player)
     {
         if (!Util.IsWorldGenerated())
             return;
-        
-        if (!_bodies.TryGetValue(player, out var netBody))
-            return;
-        _bodies.Remove(player);
-        if (!_playerIcons.TryGetValue(netBody, out var icon))
-            return;
-        Destroy(icon);
-        _playerIcons.Remove(netBody);
-    }
-    
-    private static GameObject CreateIconObjectForPlayer(NetBody netBody)
-    {
-        if (!Util.IsWorldGenerated())
+
+        foreach (var netBody in NetBody.all_instances)
         {
-            Plugin.Logger.LogError("Do not call CreateIconObjectForPlayer before world is created!");
-            return null;
+            if (netBody?.player == null || player != netBody.player)
+                continue;
+            if (!_playerIcons.TryGetValue(netBody, out var icon))
+                continue;
+            Destroy(icon);
+            _playerIcons.Remove(netBody);
         }
-        var icon = new GameObject($"{netBody.playername}InRangeOfWhisperIcon");
-        icon.transform.parent = netBody.body.transform;
-        icon.transform.localScale = Vector3.one * 5f;
-        var sprRenderer = icon.AddComponent<SpriteRenderer>();
-        sprRenderer.sortingOrder = 6001;
-        sprRenderer.color = netBody.player.plrcolor;
-        sprRenderer.sprite = Sprite.Create(_iconTexture, new Rect(0, 0, _iconTexture.width, _iconTexture.height), new Vector2(0.5f, 0.5f));
-        icon.SetActive(false);
-        return icon;
     }
 
     private void LateUpdate()
@@ -85,11 +60,8 @@ public class IconController : MonoBehaviour
         if (!Util.IsWorldGenerated())
             return;
 
-        if (NetPlayer.ClientIdToPlayerDict.Count != _bodies.Count)
-        {
-            if (!TryCreateIconObjects())
-                return;
-        }
+        if (!EnsureIconObjects())
+            return;
         
         if (!Chat.CHAT_textbox_input_focused
             || !Plugin.HasWhisperCommand(Chat.CHAT_current_input)
@@ -110,13 +82,13 @@ public class IconController : MonoBehaviour
 
         var pos = NetPlayer.LOCAL_PLAYER.body.GetPosition();
         var radius = hearingRange * hearingRange;
-        foreach (var netBody in _bodies.Values)
+        foreach (var netBody in NetBody.all_instances)
         {
             if (!netBody.body || !netBody.body.alive || netBody.is_local)
                 continue;
+            if (!_playerIcons.TryGetValue(netBody, out var icon))
+                continue;
             var headPos = netBody.body.GetHead().transform.position;
-
-            var icon = _playerIcons[netBody];
             var position = icon.transform.position;
             var y = position.y;
 
@@ -169,34 +141,17 @@ public class IconController : MonoBehaviour
         _iconTexture.filterMode = FilterMode.Point;
     }
 
-    private bool TryCreateIconObjects()
+    private bool EnsureIconObjects()
     {
+        if (NetPlayer.ClientIdToPlayerDict.Count == _playerIcons.Count)
+            return true;
+        
         _timer += Time.deltaTime;
-        if (_timer < 5.0f)
+        if (_timer < 2.0f)
             return false;
         _timer = 0;
-        
-        List<NetPlayer> toRemove = [];
-        foreach (var pair in _bodies)
-        {
-            if (pair.Value == null || !NetPlayer.ClientIdToPlayerDict.ContainsValue(pair.Key))
-                toRemove.Add(pair.Key);
-        }
-        foreach (var player in toRemove)
-        {
-            var netBody = _bodies[player];
-            _bodies.Remove(player);
-            Destroy(_playerIcons[netBody]);
-            _playerIcons.Remove(netBody);
-        }
 
-        foreach (var netBody in FindObjectsByType<NetBody>(FindObjectsSortMode.None))
-        {
-            if (netBody.player == null || _bodies.ContainsKey(netBody.player))
-                continue;
-            _bodies.Add(netBody.player, netBody);
-        }
-        foreach (var netBody in _bodies.Values)
+        foreach (var netBody in NetBody.all_instances)
         {
             if (_playerIcons.ContainsKey(netBody))
                 continue;
@@ -204,5 +159,23 @@ public class IconController : MonoBehaviour
         }
 
         return true;
+    }
+    
+    private static GameObject CreateIconObjectForPlayer(NetBody netBody)
+    {
+        if (!Util.IsWorldGenerated())
+        {
+            Plugin.Logger.LogError("Do not call CreateIconObjectForPlayer before world is created!");
+            return null;
+        }
+        var icon = new GameObject($"{netBody.playername}InRangeOfWhisperIcon");
+        icon.transform.parent = netBody.body.transform;
+        icon.transform.localScale = Vector3.one * 5f;
+        var sprRenderer = icon.AddComponent<SpriteRenderer>();
+        sprRenderer.sortingOrder = 6001;
+        sprRenderer.color = netBody.player.plrcolor;
+        sprRenderer.sprite = Sprite.Create(_iconTexture, new Rect(0, 0, _iconTexture.width, _iconTexture.height), new Vector2(0.5f, 0.5f));
+        icon.SetActive(false);
+        return icon;
     }
 }

@@ -10,7 +10,7 @@ public class Plugin : BaseUnityPlugin
 {
     public const string ModGuid = "cump.whispermod";
     public const string ModName = "CasualtiesTogetherWhisper";
-    public const string ModVersion = "0.0.2";
+    public const string ModVersion = "0.0.3";
 
     internal static new ManualLogSource Logger;
     
