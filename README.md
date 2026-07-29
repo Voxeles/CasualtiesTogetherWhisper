@@ -1,4 +1,4 @@
-### A plugin for adding whispering to the Casualties: Unknown Multiplayer mod
+### A mod for adding whispering to the Casualties: Unknown Multiplayer mod
 
 Casualties: Unknown multiplayer mod: https://www.nexusmods.com/scavprototype/mods/67
 
