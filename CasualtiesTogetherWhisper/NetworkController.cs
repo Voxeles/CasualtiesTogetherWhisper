@@ -108,12 +108,10 @@ public static class NetworkController
         if (sender.IsAlive() && KrokoshaScavMultiplayer.rules.SpeechImpairedChat)
             message = sender.body.talker.DistortString(message);
         
-        var chatTag = "whisper";
-        
         foreach (var player in NetPlayer.GetPlayersInRadius(sender.body.GetPosition(), hearingRange))
         {
             var ownMessage = message;
-            var ownChatTag = chatTag;
+            var ownChatTag = "<color=fuchsia>whisper</color>";
             if (player != sender)
             {
                 if (!sender.CanCommunicateWith_TextChat(player))
