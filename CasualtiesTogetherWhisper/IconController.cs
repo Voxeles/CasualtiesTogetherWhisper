@@ -155,7 +155,9 @@ public class IconController : MonoBehaviour
         {
             if (_playerIcons.ContainsKey(netBody))
                 continue;
-            _playerIcons.Add(netBody, CreateIconObjectForPlayer(netBody));
+            var icon = CreateIconObjectForPlayer(netBody);
+            if (icon != null)
+                _playerIcons.Add(netBody, icon);
         }
 
         return true;
@@ -163,11 +165,8 @@ public class IconController : MonoBehaviour
     
     private static GameObject CreateIconObjectForPlayer(NetBody netBody)
     {
-        if (!Util.IsWorldGenerated())
-        {
-            Plugin.Logger.LogError("Do not call CreateIconObjectForPlayer before world is created!");
+        if (!Util.IsWorldGenerated() || !netBody.player || !netBody.body)
             return null;
-        }
         var icon = new GameObject($"{netBody.playername}InRangeOfWhisperIcon");
         icon.transform.parent = netBody.body.transform;
         icon.transform.localScale = Vector3.one * 5f;
