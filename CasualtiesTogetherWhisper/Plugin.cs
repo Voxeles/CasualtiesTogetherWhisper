@@ -12,7 +12,7 @@ public class Plugin : BaseUnityPlugin
     public const string ModName = "CasualtiesTogetherWhisper";
     public const string ModVersion = "0.0.5";
 
-    internal static new ManualLogSource Logger;
+    internal new static ManualLogSource Logger;
     
     private readonly Harmony _harmony = new(ModGuid);
     public static Plugin Instance { get; private set; } = null!;
@@ -91,8 +91,8 @@ public class Plugin : BaseUnityPlugin
             }
             else
             {
-                hearingRange = 20;
-                message = "";
+                hearingRange = 0;
+                message = null;
                 return false;
             }
         }
@@ -100,4 +100,3 @@ public class Plugin : BaseUnityPlugin
 
     public static bool IsValidHearingRange(int hearingRange) => hearingRange is > 0 and <= 40;
 }
-

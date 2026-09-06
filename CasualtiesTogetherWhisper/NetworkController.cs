@@ -84,6 +84,14 @@ public static class NetworkController
             Net.Server_SendToClients(DeliveryMethod.Unreliable, writer, clientId);
             return;
         }
+        if (!sender.IsAlive() && !KrokoshaScavMultiplayer.rules.CanCommunicateWithTheDeadTC())
+        {
+            NetDataWriter writer = Net.CreateWriter(10098);
+            writer.Put((byte) 1);
+            writer.Put("Dead chat is disabled!");
+            Net.Server_SendToClients(DeliveryMethod.Unreliable, writer, clientId);
+            return;
+        }
         if (!Chat.ValidateChatMessage(message))
         {
             NetDataWriter writer = Net.CreateWriter(10098);
@@ -108,7 +116,7 @@ public static class NetworkController
         if (sender.IsAlive() && KrokoshaScavMultiplayer.rules.SpeechImpairedChat)
             message = sender.body.talker.DistortString(message);
         
-        foreach (var player in NetPlayer.GetPlayersInRadius(sender.body.GetPosition(), hearingRange))
+        foreach (var player in NetPlayer.GetPlayersInRadius(sender.pos, hearingRange))
         {
             var ownMessage = message;
             var ownChatTag = "<color=fuchsia>whisper</color>";

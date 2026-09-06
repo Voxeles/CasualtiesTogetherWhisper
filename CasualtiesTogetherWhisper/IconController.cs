@@ -35,8 +35,6 @@ public class IconController : MonoBehaviour
         foreach (var icon in _playerIcons.Values)
             Destroy(icon);
         _playerIcons.Clear();
-        foreach (var netBody in NetBody.all_instances)
-            _playerIcons.Add(netBody, CreateIconObjectForPlayer(netBody));
     }
 
     private void OnPlayerLeft(NetPlayer player)
@@ -60,8 +58,7 @@ public class IconController : MonoBehaviour
         if (!Util.IsWorldGenerated())
             return;
 
-        if (!EnsureIconObjects())
-            return;
+        EnsureIconObjects();
         
         if (!Chat.CHAT_textbox_input_focused
             || !Plugin.HasWhisperCommand(Chat.CHAT_current_input)
@@ -80,7 +77,7 @@ public class IconController : MonoBehaviour
         
         _wasTyping = true;
 
-        var pos = NetPlayer.LOCAL_PLAYER.body.GetPosition();
+        var pos = NetPlayer.LOCAL_PLAYER.pos;
         var radius = hearingRange * hearingRange;
         foreach (var netBody in NetBody.all_instances)
         {
@@ -141,26 +138,26 @@ public class IconController : MonoBehaviour
         _iconTexture.filterMode = FilterMode.Point;
     }
 
-    private bool EnsureIconObjects()
+    private void EnsureIconObjects()
     {
         if (NetPlayer.ClientIdToPlayerDict.Count == _playerIcons.Count)
-            return true;
+            return;
         
         _timer += Time.deltaTime;
         if (_timer < 2.0f)
-            return false;
+            return;
         _timer = 0;
 
         foreach (var netBody in NetBody.all_instances)
         {
-            if (_playerIcons.ContainsKey(netBody))
+            _playerIcons.TryGetValue(netBody, out var icon);
+            if (icon != null)
                 continue;
-            var icon = CreateIconObjectForPlayer(netBody);
+            _playerIcons.Remove(netBody);
+            icon = CreateIconObjectForPlayer(netBody);
             if (icon != null)
                 _playerIcons.Add(netBody, icon);
         }
-
-        return true;
     }
     
     private static GameObject CreateIconObjectForPlayer(NetBody netBody)
