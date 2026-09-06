@@ -5,12 +5,13 @@ using KrokoshaCasualtiesMP;
 
 namespace CasualtiesTogetherWhisper;
 
-[BepInPlugin(ModGuid, ModName, ModVersion)]
+[BepInPlugin(MyPluginInfo.PLUGIN_GUID, MyPluginInfo.PLUGIN_NAME, MyPluginInfo.PLUGIN_VERSION)]
+[BepInDependency("KrokoshaCasualtiesMP")]
 public class Plugin : BaseUnityPlugin
 {
-    public const string ModGuid = "cump.whispermod";
-    public const string ModName = "CasualtiesTogetherWhisper";
-    public const string ModVersion = "0.0.5";
+    public const string ModGuid = MyPluginInfo.PLUGIN_GUID;
+    public const string ModName = MyPluginInfo.PLUGIN_NAME;
+    public const string ModVersion = MyPluginInfo.PLUGIN_VERSION;
 
     internal new static ManualLogSource Logger;
     
