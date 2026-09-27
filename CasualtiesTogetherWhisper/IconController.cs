@@ -169,7 +169,7 @@ public class IconController : MonoBehaviour
         icon.transform.localScale = Vector3.one * 5f;
         var sprRenderer = icon.AddComponent<SpriteRenderer>();
         sprRenderer.sortingOrder = 6001;
-        sprRenderer.color = netBody.player.plrcolor;
+        sprRenderer.color = netBody.player.playerColor;
         sprRenderer.sprite = Sprite.Create(_iconTexture, new Rect(0, 0, _iconTexture.width, _iconTexture.height), new Vector2(0.5f, 0.5f));
         icon.SetActive(false);
         return icon;
