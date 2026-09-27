@@ -81,7 +81,7 @@ public class IconController : MonoBehaviour
         var radius = hearingRange * hearingRange;
         foreach (var netBody in NetBody.all_instances)
         {
-            if (!netBody.body || !netBody.body.alive || netBody.is_local)
+            if (netBody == null || netBody.body == null || !netBody.body.alive || netBody.is_local)
                 continue;
             if (!_playerIcons.TryGetValue(netBody, out var icon))
                 continue;
@@ -150,9 +150,13 @@ public class IconController : MonoBehaviour
 
         foreach (var netBody in NetBody.all_instances)
         {
+            if (netBody == null)
+                continue;
+
             _playerIcons.TryGetValue(netBody, out var icon);
             if (icon != null)
                 continue;
+
             _playerIcons.Remove(netBody);
             icon = CreateIconObjectForPlayer(netBody);
             if (icon != null)
