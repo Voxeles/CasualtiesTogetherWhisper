@@ -27,4 +27,3 @@ internal static class Patches
         }
     }
 }
-
