@@ -1,5 +1,7 @@
 ### A mod for adding whispering to the Casualties: Unknown Multiplayer mod
 
+![Banner](assets/banner_text.png)
+
 Multiplayer mod: https://www.nexusmods.com/scavprototype/mods/67
 (Tested with v4.0.1 and v4.1.2)
 
