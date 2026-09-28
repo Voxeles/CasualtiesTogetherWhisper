@@ -1,4 +1,4 @@
-### A mod for adding whispering to the Casualties: Unknown Multiplayer mod
+# A mod for adding whispers to Casualties: Unknown Multiplayer
 
 ![Banner](assets/banner_text.png)
 
@@ -11,12 +11,12 @@ Especially useful in lobbies with many people.
 Both the host and the client need to have this mod installed for it to work.
 You can still whisper to clients that do not have this mod, but they cannot whisper back.
 
-#### Installation
+## Installation
 
 1. Download CasualtiesTogetherWhisper.zip from [Releases](https://github.com/Voxeles/CasualtiesTogetherWhisper/releases)
 2. Extract CasualtiesTogetherWhisper.dll to your plugins folder ("Casualties Unknown Demo/BepInEx/plugins")
 
-#### Usage
+## Usage
 
 Begin your chat message with "/w " to send a whisper.
 While sending your message, you will see markers above players that will hear you.
