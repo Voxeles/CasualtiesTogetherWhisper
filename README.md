@@ -1,10 +1,13 @@
 ### A mod for adding whispering to the Casualties: Unknown Multiplayer mod
 
-Casualties: Unknown multiplayer mod: https://www.nexusmods.com/scavprototype/mods/67
+Multiplayer mod: https://www.nexusmods.com/scavprototype/mods/67
+(Tested with v4.0.1 and v4.1.2)
 
 Enables short-range communication for chatting with people near you.
-Especially useful in lobbies with ProximityHearDistance disabled.
+Especially useful in lobbies with many people.
+
 Both the host and the client need to have this mod installed for it to work.
+You can still whisper to clients that do not have this mod, but they cannot whisper back.
 
 #### Installation
 

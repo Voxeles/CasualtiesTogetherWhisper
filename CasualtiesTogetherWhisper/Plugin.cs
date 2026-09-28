@@ -1,4 +1,5 @@
-﻿using BepInEx;
+﻿using System.Reflection;
+using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
 using KrokoshaCasualtiesMP;
@@ -14,15 +15,21 @@ public class Plugin : BaseUnityPlugin
     public const string ModVersion = MyPluginInfo.PLUGIN_VERSION;
 
     internal new static ManualLogSource Logger;
-    
+
     private readonly Harmony _harmony = new(ModGuid);
     public static Plugin Instance { get; private set; } = null!;
-    
+
+    public static FieldInfo MpModPlayerColorField = null;
+
     private void Awake()
     {
         Logger = base.Logger;
         Instance = this;
-        
+
+        MpModPlayerColorField = typeof(NetPlayer).GetField("playerColor");
+        if (MpModPlayerColorField == null)
+            MpModPlayerColorField = typeof(NetPlayer).GetField("plrcolor");
+
         gameObject.AddComponent<IconController>();
 
         _harmony.PatchAll();
@@ -45,12 +52,12 @@ public class Plugin : BaseUnityPlugin
             NetworkController.EnsureHandlers();
         }
     }
-    
+
     public static bool HasWhisperCommand(string message)
     {
         if (!message.StartsWith("/w"))
             return false;
-        if (message.Length == 2)
+        if (message.Length < 3)
             return true;
         if (message[2] == ' ' || (message[2] >= '0' && message[2] <= '9'))
             return true;
@@ -65,7 +72,7 @@ public class Plugin : BaseUnityPlugin
             message = null;
             return false;
         }
-        
+
         input = input.Remove(0, 2);
         if (input.Length == 0)
         {
@@ -87,7 +94,7 @@ public class Plugin : BaseUnityPlugin
             if (int.TryParse(input.Substring(0, i), out int range))
             {
                 hearingRange = range;
-                message = input.Remove(0, i).TrimStart();
+                message = input.Remove(0, i).Trim();
                 return true;
             }
             else

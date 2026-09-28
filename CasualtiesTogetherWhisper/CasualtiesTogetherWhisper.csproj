@@ -3,7 +3,7 @@
     <TargetFramework>net48</TargetFramework>
     <BepInExPluginGuid>cump.whispermod</BepInExPluginGuid>
     <ProjectName>CasualtiesTogetherWhisper</ProjectName>
-    <Version>0.1.0</Version>
+    <Version>1.0.1</Version>
     <AssemblyName>$(ProjectName)</AssemblyName>
     <Product>$(ProjectName)</Product>
     <BepInExPluginName>$(ProjectName)</BepInExPluginName>

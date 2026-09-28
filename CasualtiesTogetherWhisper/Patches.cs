@@ -15,9 +15,10 @@ internal static class Patches
             var input = Chat.CHAT_current_input.TrimEnd();
             if (!Plugin.HasWhisperCommand(input))
                 return true; // Continue parsing
-            
+
             NetworkController.SendWhisper(input);
-            
+
+            // This is copied from OnEnteredUserMessage
             Chat._chatinput_changed = true;
             if (!Chat.MyMessageLog.Contains(in Chat.CHAT_current_input))
                 Chat.MyMessageLog.Enqueue(Chat.CHAT_current_input);

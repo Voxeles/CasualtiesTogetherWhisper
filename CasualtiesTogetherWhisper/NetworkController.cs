@@ -30,7 +30,9 @@ public static class NetworkController
     {
         if (command == null)
             return;
+
         Plugin.ParseWhisperCommand(command, out int hearingRange, out string message);
+
         if (!Plugin.IsValidHearingRange(hearingRange))
         {
             Chat.LogMessage("*SYSTEM*", "Range is invalid.");
@@ -61,10 +63,10 @@ public static class NetworkController
             NetDataWriter writer = Net.CreateWriter(10098);
             writer.Put((byte) 1);
             writer.Put("Hearing range is invalid!");
-            Net.Server_SendToClients(DeliveryMethod.Unreliable, writer, clientId);
+            Net.Server_SendToClients(DeliveryMethod.ReliableUnordered, writer, clientId);
             return;
         }
-        
+
         reader.Get(out string message);
         if (string.IsNullOrWhiteSpace(message) || !NetPlayer.TryGetPlayerFromClientId(clientId, out NetPlayer sender))
             return;
@@ -73,7 +75,7 @@ public static class NetworkController
             NetDataWriter writer = Net.CreateWriter(10098);
             writer.Put((byte) 1);
             writer.Put("Cannot send a whisper on the main menu!");
-            Net.Server_SendToClients(DeliveryMethod.Unreliable, writer, clientId);
+            Net.Server_SendToClients(DeliveryMethod.ReliableUnordered, writer, clientId);
             return;
         }
         if (sender.server_mute_tc)
@@ -81,7 +83,7 @@ public static class NetworkController
             NetDataWriter writer = Net.CreateWriter(10098);
             writer.Put((byte) 1);
             writer.Put("You're muted by the server!");
-            Net.Server_SendToClients(DeliveryMethod.Unreliable, writer, clientId);
+            Net.Server_SendToClients(DeliveryMethod.ReliableUnordered, writer, clientId);
             return;
         }
         if (!sender.IsAlive() && !KrokoshaScavMultiplayer.rules.CanCommunicateWithTheDeadTC())
@@ -89,7 +91,7 @@ public static class NetworkController
             NetDataWriter writer = Net.CreateWriter(10098);
             writer.Put((byte) 1);
             writer.Put("Dead chat is disabled!");
-            Net.Server_SendToClients(DeliveryMethod.Unreliable, writer, clientId);
+            Net.Server_SendToClients(DeliveryMethod.ReliableUnordered, writer, clientId);
             return;
         }
         if (!Chat.ValidateChatMessage(message))
@@ -97,12 +99,13 @@ public static class NetworkController
             NetDataWriter writer = Net.CreateWriter(10098);
             writer.Put((byte) 1);
             writer.Put("Invalid chat message!");
-            Net.Server_SendToClients(DeliveryMethod.Unreliable, writer, clientId);
+            Net.Server_SendToClients(DeliveryMethod.ReliableUnordered, writer, clientId);
             return;
         }
-        
+
         if (Chat.SHOULD_LOG_CHAT)
             Plugin.Logger.LogInfo($"SERVER: \"{sender}\" WHISPER MESSAGE: {message}");
+
         try
         {
             var onPlayerChatMessage = AccessTools.Field(typeof(Chat), nameof(Chat.OnPlayerChatMessage))?.GetValue(null) as Action<NetPlayer, string>;
@@ -112,14 +115,18 @@ public static class NetworkController
         {
             Plugin.Logger.LogError("SERVER: OnPlayerChatMessage: " + ex);
         }
-        
+
         if (sender.IsAlive() && KrokoshaScavMultiplayer.rules.SpeechImpairedChat)
             message = sender.body.talker.DistortString(message);
-        
+
+        var chatTag = "<color=fuchsia>whisper</color>";
+        if (!sender.IsAlive())
+            chatTag = "<color=red>DEAD</color> " + chatTag;
+
         foreach (var player in NetPlayer.GetPlayersInRadius(sender.pos, hearingRange))
         {
             var ownMessage = message;
-            var ownChatTag = "<color=fuchsia>whisper</color>";
+            var ownChatTag = chatTag;
             if (player != sender)
             {
                 if (!sender.CanCommunicateWith_TextChat(player))
@@ -129,7 +136,7 @@ public static class NetworkController
                 if (string.IsNullOrWhiteSpace(ownMessage))
                     continue;
             }
-            
+
             var writer = Net.CreateWriter(10098);
             writer.Put((byte)0);
             writer.Put(clientId);

@@ -13,7 +13,7 @@ public class IconController : MonoBehaviour
     private Dictionary<NetBody, GameObject> _playerIcons = [];
     private bool _wasTyping = false;
     private float _timer = 0;
-    
+
     private void Awake()
     {
         LoadIconTexture();
@@ -59,7 +59,7 @@ public class IconController : MonoBehaviour
             return;
 
         EnsureIconObjects();
-        
+
         if (!Chat.CHAT_textbox_input_focused
             || !Plugin.HasWhisperCommand(Chat.CHAT_current_input)
             || !Plugin.ParseWhisperCommand(Chat.CHAT_current_input, out int hearingRange, out _)
@@ -70,11 +70,11 @@ public class IconController : MonoBehaviour
 
             foreach (var icon in _playerIcons.Values)
                 icon.SetActive(false);
-            
+
             _wasTyping = false;
             return;
         }
-        
+
         _wasTyping = true;
 
         var pos = NetPlayer.LOCAL_PLAYER.pos;
@@ -132,7 +132,7 @@ public class IconController : MonoBehaviour
             assetBytes = new byte[manifestResourceStream.Length];
             manifestResourceStream.Read(assetBytes, 0, assetBytes.Length);
         }
-        
+
         _iconTexture = new Texture2D(2, 2);
         _iconTexture.LoadImage(assetBytes);
         _iconTexture.filterMode = FilterMode.Point;
@@ -142,7 +142,7 @@ public class IconController : MonoBehaviour
     {
         if (NetPlayer.ClientIdToPlayerDict.Count == _playerIcons.Count)
             return;
-        
+
         _timer += Time.deltaTime;
         if (_timer < 2.0f)
             return;
@@ -163,7 +163,7 @@ public class IconController : MonoBehaviour
                 _playerIcons.Add(netBody, icon);
         }
     }
-    
+
     private static GameObject CreateIconObjectForPlayer(NetBody netBody)
     {
         if (!Util.IsWorldGenerated() || !netBody.player || !netBody.body)
@@ -173,7 +173,10 @@ public class IconController : MonoBehaviour
         icon.transform.localScale = Vector3.one * 5f;
         var sprRenderer = icon.AddComponent<SpriteRenderer>();
         sprRenderer.sortingOrder = 6001;
-        sprRenderer.color = netBody.player.playerColor;
+        if (Plugin.MpModPlayerColorField != null)
+            sprRenderer.color = (Color24)Plugin.MpModPlayerColorField.GetValue(netBody.player);
+        else
+            sprRenderer.color = Color.white;
         sprRenderer.sprite = Sprite.Create(_iconTexture, new Rect(0, 0, _iconTexture.width, _iconTexture.height), new Vector2(0.5f, 0.5f));
         icon.SetActive(false);
         return icon;
